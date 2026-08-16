@@ -37,50 +37,178 @@ st.set_page_config(
 )
 
 # --------------------------------------------------------------------------
-# CUSTOM CSS
-# --------------------------------------------------------------------------
-st.markdown(
-    """
-    <style>
-    .main-header {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0px;
-    }
-    .sub-header {
-        font-size: 1.0rem;
-        color: #6b7280;
-        margin-top: 0px;
-        margin-bottom: 1.5rem;
-    }
-    .metric-card {
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 1rem;
-        text-align: center;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.markdown('<p class="main-header">📊 AI Agent for Review Sentiment Analysis & Business Intelligence</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Upload customer reviews, classify sentiment with transformer models, and generate an automated BI report.</p>', unsafe_allow_html=True)
-
-# --------------------------------------------------------------------------
 # SESSION STATE INIT
 # --------------------------------------------------------------------------
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
 if "results_df" not in st.session_state:
     st.session_state.results_df = None
 if "model_used" not in st.session_state:
     st.session_state.model_used = None
 if "benchmark_df" not in st.session_state:
     st.session_state.benchmark_df = None
+
+# --------------------------------------------------------------------------
+# LIGHT & DARK MODE THEME SYSTEM
+# --------------------------------------------------------------------------
+is_dark = st.session_state.theme == "dark"
+
+if is_dark:
+    theme_css = """
+    <style>
+    /* Dark Theme */
+    .stApp {
+        background-color: #0e1117;
+        color: #f3f4f6;
+    }
+    .main-header {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0px;
+    }
+    .sub-header {
+        font-size: 1.0rem;
+        color: #9ca3af;
+        margin-top: 4px;
+        margin-bottom: 1.5rem;
+    }
+    .metric-card {
+        background: rgba(31, 41, 55, 0.7);
+        border: 1px solid rgba(75, 85, 99, 0.4);
+        border-radius: 12px;
+        padding: 1.2rem;
+        text-align: center;
+        backdrop-filter: blur(8px);
+    }
+    div[data-testid="stMetricValue"] {
+        color: #f9fafb !important;
+    }
+    /* Floating circular theme button in top right */
+    div.st-key-theme_toggle_btn {
+        position: fixed;
+        top: 14px;
+        right: 110px;
+        z-index: 999999;
+    }
+    div.st-key-theme_toggle_btn > button {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        font-size: 1.15rem !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #1f2937 !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: #f9fafb !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+        transition: all 0.2s ease-in-out !important;
+        cursor: pointer !important;
+    }
+    div.st-key-theme_toggle_btn > button:hover {
+        transform: scale(1.1) rotate(15deg) !important;
+        border-color: #60a5fa !important;
+        box-shadow: 0 6px 16px rgba(96, 165, 250, 0.4) !important;
+    }
+    </style>
+    """
+    plotly_template = "plotly_dark"
+    plot_bgcolor = "#111827"
+    plot_papercolor = "#111827"
+else:
+    theme_css = """
+    <style>
+    /* Light Theme */
+    .stApp {
+        background-color: #f8fafc;
+        color: #1e293b;
+    }
+    .main-header {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1e40af 0%, #4338ca 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0px;
+    }
+    .sub-header {
+        font-size: 1.0rem;
+        color: #64748b;
+        margin-top: 4px;
+        margin-bottom: 1.5rem;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.2rem;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    div[data-testid="stMetricValue"] {
+        color: #0f172a !important;
+    }
+    div[data-testid="stMetricLabel"] {
+        color: #64748b !important;
+    }
+    /* Floating circular theme button in top right */
+    div.st-key-theme_toggle_btn {
+        position: fixed;
+        top: 14px;
+        right: 110px;
+        z-index: 999999;
+    }
+    div.st-key-theme_toggle_btn > button {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        font-size: 1.15rem !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #1e293b !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+        transition: all 0.2s ease-in-out !important;
+        cursor: pointer !important;
+    }
+    div.st-key-theme_toggle_btn > button:hover {
+        transform: scale(1.1) rotate(15deg) !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3) !important;
+    }
+    </style>
+    """
+    plotly_template = "plotly_white"
+    plot_bgcolor = "#ffffff"
+    plot_papercolor = "#ffffff"
+
+st.markdown(theme_css, unsafe_allow_html=True)
+
+# Top Right Circular Theme Switcher (positioned right next to Deploy button)
+if is_dark:
+    if st.button("☀️", key="theme_toggle_btn", help="Switch to Light Mode"):
+        st.session_state.theme = "light"
+        st.rerun()
+else:
+    if st.button("🌙", key="theme_toggle_btn", help="Switch to Dark Mode"):
+        st.session_state.theme = "dark"
+        st.rerun()
+
+st.markdown('<p class="main-header">📊 AI Agent for Review Sentiment Analysis & Business Intelligence</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Upload customer reviews, classify sentiment with transformer models, and generate an automated BI report.</p>', unsafe_allow_html=True)
 
 # --------------------------------------------------------------------------
 # SIDEBAR - NAVIGATION & CONFIGURATION
@@ -152,7 +280,11 @@ with st.sidebar:
 # --------------------------------------------------------------------------
 def load_data():
     if data_source == "Use sample dataset":
-        df = pd.read_csv("data/sample_reviews.csv")
+        import os
+        sample_path = "data/sample_reviews.csv"
+        if not os.path.exists(sample_path):
+            sample_path = os.path.join(os.path.dirname(__file__), "data", "sample_reviews.csv")
+        df = pd.read_csv(sample_path)
     else:
         if uploaded_file is None:
             return None
@@ -254,24 +386,7 @@ if run_button:
     st.success(f"✅ Done! Processed {len(result_df)} reviews in {elapsed:.1f}s using {model_key}.")
 
 if compare_button:
-    with st.spinner("Benchmarking DistilBERT, RoBERTa, and DeBERTa on a sample of 50 reviews..."):
-        sample_df = df_raw.head(50).copy()
-        bench_rows = []
-        for mk in MODEL_OPTIONS.keys():
-            start = time.time()
-            out = run_analysis(sample_df, mk, batch_size=8)
-            elapsed = time.time() - start
-            bench_rows.append(
-                {
-                    "Model": mk,
-                    "Avg Confidence": round(out["confidence"].mean(), 4),
-                    "Positive %": round((out["sentiment"] == "POSITIVE").mean() * 100, 1),
-                    "Negative %": round((out["sentiment"] == "NEGATIVE").mean() * 100, 1),
-                    "Time (s) / 50 reviews": round(elapsed, 2),
-                }
-            )
-        st.session_state.benchmark_df = pd.DataFrame(bench_rows)
-    st.success("✅ Benchmark complete — see 'Model Comparison' tab.")
+    st.info("Switched to benchmark execution — viewing in 'Model Comparison'.")
 
 # --------------------------------------------------------------------------
 # MAIN VIEWS
@@ -311,6 +426,7 @@ if selected_tab == "📈 Dashboard":
                 color="Sentiment",
                 color_discrete_map={"POSITIVE": "#22c55e", "NEGATIVE": "#ef4444", "NEUTRAL": "#f59e0b"},
                 hole=0.4,
+                template=plotly_template,
             )
             st.plotly_chart(fig_pie, use_container_width=True)
 
@@ -324,6 +440,7 @@ if selected_tab == "📈 Dashboard":
                 title="Sentiment by Product Category",
                 color_discrete_map={"POSITIVE": "#22c55e", "NEGATIVE": "#ef4444", "NEUTRAL": "#f59e0b"},
                 barmode="stack",
+                template=plotly_template,
             )
             st.plotly_chart(fig_bar, use_container_width=True)
 
@@ -341,6 +458,7 @@ if selected_tab == "📈 Dashboard":
             title="Sentiment Trend Over Time",
             markers=True,
             color_discrete_map={"POSITIVE": "#22c55e", "NEGATIVE": "#ef4444", "NEUTRAL": "#f59e0b"},
+            template=plotly_template,
         )
         st.plotly_chart(fig_trend, use_container_width=True)
 
@@ -349,6 +467,7 @@ if selected_tab == "📈 Dashboard":
             rdf, x="confidence", color="sentiment", nbins=30,
             title="Model Confidence Distribution",
             color_discrete_map={"POSITIVE": "#22c55e", "NEGATIVE": "#ef4444", "NEUTRAL": "#f59e0b"},
+            template=plotly_template,
         )
         st.plotly_chart(fig_hist, use_container_width=True)
 
@@ -369,7 +488,7 @@ elif selected_tab == "🏷️ Aspect Analysis":
             if aspects_pos:
                 pos_df = pd.DataFrame(aspects_pos, columns=["Aspect", "Mentions"])
                 fig = px.bar(pos_df.head(10).sort_values("Mentions"), x="Mentions", y="Aspect",
-                             orientation="h", color_discrete_sequence=["#22c55e"])
+                             orientation="h", color_discrete_sequence=["#22c55e"], template=plotly_template)
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("Not enough positive reviews to extract aspects.")
@@ -379,7 +498,7 @@ elif selected_tab == "🏷️ Aspect Analysis":
             if aspects_neg:
                 neg_df = pd.DataFrame(aspects_neg, columns=["Aspect", "Mentions"])
                 fig = px.bar(neg_df.head(10).sort_values("Mentions"), x="Mentions", y="Aspect",
-                             orientation="h", color_discrete_sequence=["#ef4444"])
+                             orientation="h", color_discrete_sequence=["#ef4444"], template=plotly_template)
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("Not enough negative reviews to extract aspects.")
@@ -419,23 +538,107 @@ elif selected_tab == "📝 BI Report":
 
 # ---------------- MODEL COMPARISON VIEW ----------------
 elif selected_tab == "⚖️ Model Comparison":
-    st.subheader("Benchmark: RoBERTa vs DeBERTa vs DistilBERT")
-    st.caption("Click 'Benchmark All 3 Models' in the sidebar to run this comparison on a 50-review sample.")
+    st.subheader("⚖️ Benchmark: RoBERTa vs DeBERTa vs DistilBERT")
+    st.write(
+        "Evaluate and compare accuracy, confidence, and inference speed across all 3 transformer architectures on your review dataset."
+    )
+
+    col_cfg1, col_cfg2 = st.columns([2, 1])
+    with col_cfg1:
+        bench_sample_size = st.slider(
+            "Benchmark Sample Size (reviews)",
+            min_value=10,
+            max_value=min(200, len(df_raw)),
+            value=min(50, len(df_raw)),
+            step=10,
+            help="Higher sample sizes yield more accurate benchmarks but take longer on CPU.",
+        )
+    with col_cfg2:
+        st.write("")
+        st.write("")
+        run_comp_tab_btn = st.button("🚀 Run Comparison Now", type="primary", use_container_width=True)
+
+    if run_comp_tab_btn or compare_button:
+        with st.status("Running multi-model benchmark...", expanded=True) as status:
+            sample_df = df_raw.head(bench_sample_size).copy()
+            bench_rows = []
+            for mk in MODEL_OPTIONS.keys():
+                st.write(f"🔄 Evaluating **{mk}** on {len(sample_df)} reviews...")
+                start = time.time()
+                out = run_analysis(sample_df, mk, batch_size=8)
+                elapsed = time.time() - start
+                
+                pos_pct = round((out["sentiment"] == "POSITIVE").mean() * 100, 1)
+                neg_pct = round((out["sentiment"] == "NEGATIVE").mean() * 100, 1)
+                neu_pct = round((out["sentiment"] == "NEUTRAL").mean() * 100, 1)
+                
+                bench_rows.append(
+                    {
+                        "Model": mk,
+                        "Avg Confidence": round(out["confidence"].mean(), 4),
+                        "Positive %": pos_pct,
+                        "Negative %": neg_pct,
+                        "Neutral %": neu_pct,
+                        "Total Time (s)": round(elapsed, 2),
+                        "Speed (reviews/s)": round(len(sample_df) / max(elapsed, 0.001), 1),
+                        "Architecture": MODEL_OPTIONS[mk]["description"].split(".")[0],
+                    }
+                )
+            st.session_state.benchmark_df = pd.DataFrame(bench_rows)
+            status.update(label="✅ Benchmark completed successfully!", state="complete", expanded=False)
+        st.success(f"✅ Successfully evaluated all 3 models on {len(sample_df)} reviews.")
+
     if st.session_state.benchmark_df is not None:
         bdf = st.session_state.benchmark_df
+        
+        st.markdown("#### 📊 Performance & Prediction Summary")
         st.dataframe(bdf, use_container_width=True)
 
         c1, c2 = st.columns(2)
         with c1:
-            fig = px.bar(bdf, x="Model", y="Time (s) / 50 reviews", title="Inference Speed Comparison",
-                         color="Model")
+            fig = px.bar(
+                bdf,
+                x="Model",
+                y="Total Time (s)",
+                title="⏱️ Total Inference Time (Lower is Faster)",
+                color="Model",
+                text="Total Time (s)",
+                template=plotly_template,
+            )
+            fig.update_traces(textposition="outside")
             st.plotly_chart(fig, use_container_width=True)
         with c2:
-            fig2 = px.bar(bdf, x="Model", y="Avg Confidence", title="Average Confidence by Model",
-                          color="Model")
+            fig2 = px.bar(
+                bdf,
+                x="Model",
+                y="Avg Confidence",
+                title="🎯 Average Prediction Confidence",
+                color="Model",
+                text="Avg Confidence",
+                template=plotly_template,
+            )
+            fig2.update_traces(textposition="outside")
             st.plotly_chart(fig2, use_container_width=True)
+
+        st.markdown("#### ⚖️ Sentiment Distribution Comparison")
+        dist_df = bdf.melt(
+            id_vars=["Model"],
+            value_vars=["Positive %", "Negative %", "Neutral %"],
+            var_name="Sentiment Class",
+            value_name="Percentage",
+        )
+        fig3 = px.bar(
+            dist_df,
+            x="Model",
+            y="Percentage",
+            color="Sentiment Class",
+            barmode="group",
+            title="Sentiment Breakdown by Model (%)",
+            template=plotly_template,
+        )
+        st.plotly_chart(fig3, use_container_width=True)
     else:
-        st.info("No benchmark run yet. Click 'Benchmark All 3 Models' in the sidebar to compare performance.")
+        st.info("💡 Click **'Run Comparison Now'** above (or **'Benchmark All 3 Models'** in the sidebar) to compare RoBERTa, DeBERTa, and DistilBERT.")
 
 # ---------------- RAW DATA VIEW ----------------
 elif selected_tab == "🗂️ Raw Data":
@@ -445,6 +648,3 @@ elif selected_tab == "🗂️ Raw Data":
         st.dataframe(st.session_state.results_df, use_container_width=True)
     else:
         st.dataframe(df_raw, use_container_width=True)
-
-st.markdown("---")
-st.caption("Mini Project: AI Agent for Customer Review Sentiment Analysis and Business Intelligence Generation | Models: RoBERTa · DeBERTa · DistilBERT | Dataset: Amazon Reviews (Kaggle)")
